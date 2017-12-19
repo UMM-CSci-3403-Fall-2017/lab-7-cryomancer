@@ -2,7 +2,7 @@ package echoserver;
 
 import java.net.*;
 import java.io.*;
-
+//all tests passing
 public class EchoClient {
 
     public static void main(String[] args) throws IOException{
