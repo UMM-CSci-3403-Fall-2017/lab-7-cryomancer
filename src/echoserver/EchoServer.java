@@ -1,54 +1,61 @@
 package echoserver;
 
-import java.io.*;
 import java.net.*;
+import java.io.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-public class EchoServer implements Runnable {
-	public static final int PORT_NUMBER = 6013;
+public class EchoServer {
 
-	public static void main(String[] args) throws IOException, InterruptedException {
-		try{
-			//set up socket server
-			ServerSocket iSocketXetServe = new ServerSocket(6013);
-			
-			ExecutorService threaded = Executors.newFixedThreadPool(2);
-			
-			//executing new thread for sockets
-		while(true){
-			Socket newSocket2_0 = iSocketXetServe.accept();
-			badName ThreadServer = new badName(newSocket2_0);
-			threaded.execute(ThreadServer);
+    public static void main(String[] args){
+        try {
+        	//Starting socket server
+            ServerSocket socketServe = new ServerSocket(6013);
+			//starting thread pool
+            ExecutorService pooledThread = Executors.newFixedThreadPool(32);
+
+            while(true){
+            	//running the server while true
+                System.out.println("new request please");
+                Socket client = socketServe.accept();
+
+                EchoThread echoThread = new EchoThread(client);
+                pooledThread.execute(echoThread);
+            }
+            // throw the exception Failure if the above statements are incorrect
+        } catch (IOException Failure){
+            System.err.println(Failure);
+        }
+    }
+
+    //function to set up the echo response
+    public static class EchoThread extends Thread {
+    	//setting up  new socket for the client.
+    	Socket client;
+    	public EchoThread(Socket client){
+    		this.client = client;
 		}
-		//expeception handling with conveniet failure tag
-	}catch (IOException FAILURE){
-		System.err.println(FAILURE);
-	}
-	}
-
-
-	//terrible naming scheme 
-	public static class badName extends Thread {
-		Socket iSocketX;
-		public badName(Socket iSocketX) {
-			this.iSocketX = iSocketX;
-		}
-
-		//Setting up input and output stream.
-		public void run() {
-			try{
-				OutputStream out = iSocketX.getOutputStream();
-				InputStream in = iSocketX.getInputStream();
+    	//setting up the two streams read and output respectively
+		public void run(){
+			try {
+				OutputStream out = client.getOutputStream();
+				InputStream read = client.getInputStream();
 				
-				int Done;
-				while((Done = in.read()) != -1) {
-					out.write(Done);
+				//setting up the nextByte (nb)
+				//if the nextByte isn't a negative value continuously write out the nb value.
+				int nb;
+				while((nb = read.read()) != -1){
+					out.write(nb);
 				}
-			
+				
+				//close down the sockets and flush the system
 				out.flush();
-				iSocketX.shutdownOutput();
-				iSocketX.close();
-			} catch (IOException CONTINUOUS_FAILURE) {
-				System.err.println(CONTINUOUS_FAILURE);
+				client.shutdownOutput();
+				client.close();
+				
+				//throw exception Failure if none of this works.
+    		} catch (IOException Failure){
+    			System.err.println(Failure);
 			}
 		}
 	}
